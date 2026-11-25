@@ -1,0 +1,6 @@
+node_modules
+dist
+dev-dist
+*.log
+public/pdfjs
+public/test

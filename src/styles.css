@@ -1,0 +1,706 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-paper: #faf9f5;
+  --color-sidebar: #f3f1ea;
+  --color-surface: #ffffff;
+  --color-page: #fffdf8;
+  --color-ink: #1f1e1b;
+  --color-ink-soft: #5d5a53;
+  --color-muted: #8f8b82;
+  --color-line: rgba(31, 30, 27, 0.08);
+  --color-line-strong: rgba(31, 30, 27, 0.16);
+  --color-hover: rgba(31, 30, 27, 0.05);
+  --color-accent: #a8452a;
+  --color-accent-soft: rgba(168, 69, 42, 0.09);
+  --color-pin: #e8c46a;
+  --color-pin-soft: rgba(232, 196, 106, 0.24);
+  --color-success: #3f6a4e;
+  --color-success-soft: rgba(63, 106, 78, 0.1);
+
+  --color-cover-cinnabar: #9c4a32;
+  --color-cover-pine: #3e5c4c;
+  --color-cover-indigo: #3d4f6e;
+  --color-cover-ochre: #9a7442;
+  --color-cover-moss: #6b6a3c;
+  --color-cover-ink: #34322e;
+
+  --font-sans: 'HarmonyOS Sans SC', 'PingFang SC', 'MiSans', 'Microsoft YaHei UI', system-ui, sans-serif;
+  --font-reading: 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', STSong, serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+button {
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+button:disabled {
+  cursor: default;
+}
+
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.dr-paper-grid {
+  background-color: var(--color-paper);
+  background-image:
+    linear-gradient(rgba(31, 30, 27, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(31, 30, 27, 0.028) 1px, transparent 1px);
+  background-size: 96px 96px;
+}
+
+}
+
+@layer components {
+/* 幽灵按钮 */
+.dr-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 10px;
+  border-radius: 10px;
+  color: var(--color-ink-soft);
+  transition: background-color 0.16s, transform 0.16s var(--ease-editorial);
+}
+.dr-btn:active {
+  background: var(--color-hover);
+  transform: scale(0.97);
+}
+.dr-btn:disabled {
+  opacity: 0.4;
+}
+.dr-btn.is-on {
+  color: var(--color-accent);
+}
+
+/* 实心按钮：只给主操作 */
+.dr-btn-solid {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 12px;
+  background: var(--color-ink);
+  color: #fff;
+  font-size: 15px;
+  transition: transform 0.16s var(--ease-editorial), opacity 0.16s;
+}
+.dr-btn-solid:active {
+  transform: scale(0.98);
+}
+.dr-btn-solid:disabled {
+  opacity: 0.35;
+}
+
+.dr-send {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: #fff;
+  flex: none;
+}
+.dr-send:disabled {
+  opacity: 0.35;
+}
+
+/* 文字 tab：下划线指示 */
+.dr-tabs {
+  display: flex;
+  gap: 22px;
+}
+.dr-tab {
+  position: relative;
+  padding: 8px 0;
+  font-size: 15px;
+  color: var(--color-ink-soft);
+}
+.dr-tab.is-on {
+  color: var(--color-ink);
+}
+.dr-tab.is-on::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--color-accent);
+}
+
+.dr-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 10px;
+  background: var(--color-surface);
+  outline: none;
+  font-size: 16px;
+}
+.dr-input:focus {
+  border-color: var(--color-ink-soft);
+}
+
+.dr-view-enter {
+  animation: dr-view-in 0.32s var(--ease-editorial) both;
+}
+@keyframes dr-view-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* ---------- 底部抽屉 ---------- */
+.dr-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(31, 30, 27, 0.28);
+  animation: dr-fade 0.2s ease both;
+}
+.dr-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 61;
+  max-height: 86dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border-radius: 16px 16px 0 0;
+  padding-bottom: var(--safe-bottom);
+  box-shadow: 0 -1px 0 var(--color-line);
+  animation: dr-sheet-in 0.32s var(--ease-editorial) both;
+}
+@media (min-width: 640px) {
+  .dr-sheet {
+    left: 50%;
+    width: 560px;
+    margin-left: -280px;
+  }
+}
+.dr-sheet-grip {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-line-strong);
+  margin: 8px auto 2px;
+  flex: none;
+}
+@keyframes dr-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes dr-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---------- 提示条 ---------- */
+.dr-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + var(--safe-bottom));
+  z-index: 90;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: var(--color-ink);
+  color: #fff;
+  font-size: 14px;
+  line-height: 1.5;
+  animation: dr-view-in 0.24s var(--ease-editorial) both;
+}
+
+/* ---------- 3D 书架 ---------- */
+.dr-shelf {
+  --book-h: 260px;
+  --cover-w: 172px;
+}
+.dr-shelf-stage {
+  position: relative;
+  perspective: 3600px;
+  perspective-origin: 50% 0%;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+}
+.dr-shelf-stage::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 30px;
+  height: 1px;
+  background: rgba(31, 30, 27, 0.12);
+}
+.dr-shelf-stage::after {
+  content: '';
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 14px;
+  height: 26px;
+  background: radial-gradient(ellipse at center, rgba(31, 30, 27, 0.15), rgba(31, 30, 27, 0) 70%);
+  pointer-events: none;
+}
+.dr-shelf-row {
+  position: absolute;
+  left: 50%;
+  bottom: 36px;
+  height: var(--book-h);
+  transform-style: preserve-3d;
+  transform-origin: 50% 100%;
+  transform: translateX(var(--dx, 0px)) scale(var(--s, 1)) rotateX(-14deg) rotateY(-42deg);
+}
+/* 注意：书和书架上不能有 opacity / filter / overflow，否则 3D 会被压平 */
+.dr-book {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: var(--book-h);
+  transform-style: preserve-3d;
+  transform: translate3d(var(--tx, 0px), var(--lift, 0px), var(--tz, 0px)) rotateY(var(--turn, 0deg));
+  transition: transform 0.35s var(--ease-editorial);
+  cursor: pointer;
+}
+.dr-book.is-peek {
+  --lift: calc(var(--book-h) * -0.15);
+  --tz: calc(var(--cover-w) * 0.25);
+  --turn: -22deg;
+}
+.dr-book-face {
+  position: absolute;
+  background: #fff;
+  border: 1px solid rgba(31, 30, 27, 0.3);
+  backface-visibility: hidden;
+  animation: dr-fade 0.6s ease both;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+.dr-book.is-blank .dr-book-face {
+  opacity: 0.5;
+}
+.dr-book-spine {
+  inset: 0;
+  transform: translateZ(calc(var(--cover-w) / 2));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0 11px;
+  overflow: hidden;
+}
+.dr-book.is-note .dr-book-spine {
+  border-top: 3px solid var(--color-accent);
+}
+.dr-book-no {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1;
+  color: var(--color-ink);
+}
+.dr-book-title {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  writing-mode: vertical-rl;
+  font-family: var(--font-reading);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  overflow: hidden;
+  color: var(--color-ink);
+}
+.dr-book-hole {
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--color-ink-soft);
+  border-radius: 50%;
+  flex: none;
+}
+.dr-book-top {
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: var(--cover-w);
+  margin-top: calc(var(--cover-w) / -2);
+  transform: rotateX(90deg) translateZ(calc(var(--book-h) / 2));
+  background: #f3f2ee;
+}
+.dr-book-side {
+  left: 100%;
+  top: 0;
+  width: var(--cover-w);
+  height: var(--book-h);
+  transform-origin: 0 50%;
+  transform: translate3d(0, 0, calc(var(--cover-w) / 2)) rotateY(90deg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 9px 10px 8px;
+}
+.dr-book-side-top,
+.dr-book-side-bottom {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  line-height: 1;
+  color: var(--color-ink-soft);
+}
+.dr-book-art {
+  position: relative;
+  flex: 1;
+  margin: 7px 0 6px;
+  border-radius: 2px;
+  overflow: hidden;
+  visibility: hidden;
+}
+.dr-book-side-bottom {
+  visibility: hidden;
+}
+.dr-book.is-peek .dr-book-art,
+.dr-book.is-peek .dr-book-side-bottom {
+  visibility: visible;
+}
+
+/* ---------- 封面 ---------- */
+.dr-cover {
+  position: relative;
+  overflow: hidden;
+  border-radius: 3px;
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(31, 30, 27, 0.12);
+}
+.dr-cover-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 10%;
+}
+.dr-cover-fallback b {
+  font-family: var(--font-reading);
+  font-weight: 500;
+  line-height: 1.3;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+}
+
+/* ---------- 阅读 ---------- */
+.dr-reader-content {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+.dr-pdf-page {
+  position: relative;
+  margin: 0 auto 10px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(31, 30, 27, 0.12);
+}
+.dr-pdf-page canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.dr-mark {
+  position: absolute;
+  border-radius: 3px;
+  background: var(--color-pin-soft);
+  box-shadow: inset 0 0 0 1px rgba(232, 196, 106, 0.7);
+}
+.dr-mark.is-flash {
+  animation: dr-flash 1.2s ease 2;
+}
+@keyframes dr-flash {
+  50% {
+    background: rgba(232, 196, 106, 0.55);
+  }
+}
+.dr-box {
+  position: fixed;
+  z-index: 40;
+  border: 1.5px solid var(--color-accent);
+  background: rgba(168, 69, 42, 0.06);
+  border-radius: 3px;
+  pointer-events: none;
+}
+.dr-press-ring {
+  position: fixed;
+  z-index: 41;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  border-radius: 50%;
+  border: 2px solid var(--color-accent);
+  pointer-events: none;
+  animation: dr-ring 0.4s linear both;
+}
+@keyframes dr-ring {
+  from {
+    transform: scale(0.4);
+    opacity: 0.2;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.dr-prose {
+  font-family: var(--font-reading);
+  font-size: var(--fs, 18px);
+  line-height: var(--lh, 1.85);
+  color: var(--color-ink);
+  word-break: break-word;
+}
+.dr-prose p {
+  margin: 0 0 0.9em;
+  text-indent: 2em;
+}
+.dr-prose h1,
+.dr-prose h2,
+.dr-prose h3,
+.dr-prose h4 {
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 1.4em 0 0.8em;
+  text-indent: 0;
+}
+.dr-prose h1 {
+  font-size: 1.45em;
+}
+.dr-prose h2 {
+  font-size: 1.3em;
+}
+.dr-prose h3 {
+  font-size: 1.15em;
+}
+.dr-prose img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1em auto;
+}
+.dr-prose blockquote {
+  margin: 1em 0;
+  padding-left: 1em;
+  border-left: 3px solid var(--color-line-strong);
+  color: var(--color-ink-soft);
+}
+.dr-prose pre {
+  overflow-x: auto;
+  font-size: 0.8em;
+  background: var(--color-sidebar);
+  padding: 0.8em;
+  border-radius: 6px;
+}
+.dr-prose table {
+  border-collapse: collapse;
+  font-size: 0.85em;
+  display: block;
+  overflow-x: auto;
+}
+.dr-prose td,
+.dr-prose th {
+  border: 1px solid var(--color-line-strong);
+  padding: 4px 8px;
+}
+.dr-prose .is-annotated {
+  background: linear-gradient(transparent 60%, var(--color-pin-soft) 60%);
+  box-shadow: -10px 0 0 -7px var(--color-pin);
+}
+.dr-prose .is-flash {
+  animation: dr-flash 1.2s ease 2;
+}
+
+/* AI 回答 */
+.dr-answer {
+  font-family: var(--font-reading);
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--color-ink);
+}
+.dr-answer p {
+  margin: 0 0 0.7em;
+}
+.dr-answer ul,
+.dr-answer ol {
+  margin: 0 0 0.7em;
+  padding-left: 1.3em;
+}
+.dr-answer ul {
+  list-style: disc;
+}
+.dr-answer ol {
+  list-style: decimal;
+}
+.dr-answer code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--color-sidebar);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+.dr-answer pre {
+  overflow-x: auto;
+  background: var(--color-sidebar);
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+.dr-answer pre code {
+  background: none;
+  padding: 0;
+}
+.dr-answer strong {
+  font-weight: 600;
+}
+.dr-quote {
+  border-left: 3px solid var(--color-pin);
+  padding-left: 10px;
+  color: var(--color-ink-soft);
+  font-family: var(--font-reading);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.dr-caret::after {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -0.15em;
+  background: var(--color-accent);
+  animation: dr-blink 1s steps(2) infinite;
+}
+@keyframes dr-blink {
+  50% {
+    opacity: 0;
+  }
+}
+}
+
+/* ---------- 笔记本编辑器 ----------
+   Crepe 自带的样式没有放进 layer，所以这里也不能放进 layer，否则会被它盖掉 */
+.dr-note .milkdown {
+  --crepe-color-background: transparent;
+  --crepe-color-on-background: var(--color-ink);
+  --crepe-color-surface: var(--color-surface);
+  --crepe-color-surface-low: var(--color-sidebar);
+  --crepe-color-on-surface: var(--color-ink);
+  --crepe-color-on-surface-variant: var(--color-ink-soft);
+  --crepe-color-outline: var(--color-line-strong);
+  --crepe-color-primary: var(--color-accent);
+  --crepe-color-secondary: var(--color-pin-soft);
+  --crepe-color-on-secondary: var(--color-ink);
+  --crepe-color-inverse: var(--color-ink);
+  --crepe-color-on-inverse: #fff;
+  --crepe-color-inline-code: var(--color-accent);
+  --crepe-color-error: var(--color-accent);
+  --crepe-color-hover: var(--color-hover);
+  --crepe-color-selected: var(--color-pin-soft);
+  --crepe-color-inline-area: var(--color-sidebar);
+  --crepe-font-title: var(--font-reading);
+  --crepe-font-default: var(--font-reading);
+  --crepe-font-code: var(--font-mono);
+}
+.dr-note .milkdown .ProseMirror {
+  padding: 8px 20px 50vh 34px;
+  font-size: 16px;
+  line-height: 1.85;
+}
+.dr-note .milkdown .ProseMirror h1 {
+  font-size: 26px;
+  font-weight: 500;
+}
+.dr-note .milkdown .ProseMirror h2 {
+  font-size: 21px;
+  font-weight: 500;
+}
+.dr-note .milkdown .ProseMirror h3 {
+  font-size: 18px;
+  font-weight: 500;
+}
+.dr-note .milkdown .ProseMirror blockquote {
+  border-left: 3px solid var(--color-pin);
+  color: var(--color-ink-soft);
+  padding-left: 14px;
+  margin-left: 0;
+}
+.dr-note .milkdown .ProseMirror a {
+  color: var(--color-accent);
+}
+.dr-note .milkdown .ProseMirror mark {
+  background: var(--color-pin-soft);
+  color: inherit;
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
