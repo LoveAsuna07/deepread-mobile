@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { BookOpen, FilePlus2, MoreHorizontal, NotebookPen, Settings, Upload } from 'lucide-react'
-import Shelf3D, { type ShelfItem } from '../components/Shelf3D'
+import Shelf3D, { SHELF_HOVER, type ShelfItem } from '../components/Shelf3D'
 import { ConfirmButton, Cover, Sheet, useToast } from '../components/ui'
 import NotebookDialog from '../components/NotebookDialog'
 import { db } from '../lib/db'
@@ -85,7 +85,8 @@ export default function ShelfPage() {
     return list.sort((a, b) => b.at - a.at)
   }, [docs, notebooks, tab])
 
-  const shelfItems = items.slice(0, 12)
+  // 电脑上整排缩放放下，最多 12 本；手机上可以左右滑，多放一些
+  const shelfItems = items.slice(0, SHELF_HOVER ? 12 : 40)
   const featured = items.find((it) => it.id === peekId) ?? items[0]
 
   function open(item: ShelfItem) {
@@ -190,7 +191,11 @@ export default function ShelfPage() {
                   {featured.title}
                 </h2>
                 <p className="mt-1 text-[13px] text-[var(--color-ink-soft)]">
-                  {peekId ? '再点一次书，或点右边打开' : '点书脊把它抽出来看看'}
+                  {SHELF_HOVER
+                    ? '鼠标移到书上抽出来看，点书打开'
+                    : peekId
+                      ? '点右边打开，左右滑动书架看别的书'
+                      : '点书脊抽出来看看，左右滑动书架'}
                 </p>
               </div>
               <button type="button" className="dr-btn-solid flex-none" onClick={() => open(featured)}>
