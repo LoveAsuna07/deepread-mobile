@@ -85,8 +85,7 @@ export default function ShelfPage() {
     return list.sort((a, b) => b.at - a.at)
   }, [docs, notebooks, tab])
 
-  // 电脑上整排缩放放下，最多 12 本；手机上可以左右滑，多放一些
-  const shelfItems = items.slice(0, SHELF_HOVER ? 12 : 40)
+  const shelfItems = items.slice(0, 12)
   const featured = items.find((it) => it.id === peekId) ?? items[0]
 
   function open(item: ShelfItem) {
@@ -194,8 +193,8 @@ export default function ShelfPage() {
                   {SHELF_HOVER
                     ? '鼠标移到书上抽出来看，点书打开'
                     : peekId
-                      ? '点右边打开，左右滑动书架看别的书'
-                      : '点书脊抽出来看看，左右滑动书架'}
+                      ? '点右边打开；再点这本书放回去'
+                      : '手指在书上划过或点一下，把书抽出来看看'}
                 </p>
               </div>
               <button type="button" className="dr-btn-solid flex-none" onClick={() => open(featured)}>
