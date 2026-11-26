@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { useRegisterSW } from 'virtual:pwa-register/react'
+import Splash from './components/Splash'
 import { ToastProvider } from './components/ui'
 import { useRoute } from './lib/router'
 import ShelfPage from './pages/ShelfPage'
@@ -43,6 +44,7 @@ export default function App() {
         )}
       </Suspense>
       <UpdateBar />
+      <Splash />
     </ToastProvider>
   )
 }
