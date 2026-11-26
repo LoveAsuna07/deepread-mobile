@@ -19,6 +19,8 @@ export interface Doc {
   /** 文本类在章节内的滚动比例 0–1 */
   lastOffset?: number
   progress?: number
+  /** 这本书自己的阅读设置（主题、字体、边距等），没有就用全局的 */
+  reading?: ReadingSettings
 }
 
 /** EPUB / TXT 解析后的章节，html 已清洗；图片用 dr-blob:<id> 占位 */
@@ -75,7 +77,14 @@ export interface AiSettings {
   visionModel: string
 }
 
+export type ReadingTheme = 'paper' | 'sepia' | 'green' | 'night'
+export type ReadingTypeface = 'serif' | 'sans'
+export type ReadingMargin = 'narrow' | 'medium' | 'wide'
+
 export interface ReadingSettings {
   fontSize: number
   lineHeight: number
+  theme?: ReadingTheme
+  typeface?: ReadingTypeface
+  margin?: ReadingMargin
 }

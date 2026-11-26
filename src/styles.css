@@ -263,6 +263,10 @@ textarea {
   line-height: 1.5;
   animation: dr-view-in 0.24s var(--ease-editorial) both;
 }
+/* 阅读页底栏开着时，提示条挪到底栏上面 */
+.dr-bars-on .dr-toast {
+  bottom: calc(68px + var(--safe-bottom));
+}
 
 /* ---------- 开场动画 ---------- */
 .dr-splash {
@@ -458,6 +462,8 @@ textarea {
 
 /* ---------- 阅读 ---------- */
 .dr-reader-content {
+  /* 前后接章节时由 TextView 自己补滚动位置（iOS 没有滚动锚定），关掉浏览器的，免得补两次 */
+  overflow-anchor: none;
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
@@ -583,6 +589,21 @@ textarea {
 }
 .dr-prose .is-flash {
   animation: dr-flash 1.2s ease 2;
+}
+
+.dr-chapter-gap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 56px 0 28px;
+  color: var(--color-muted);
+  font-size: 12px;
+}
+.dr-chapter-gap span:first-child,
+.dr-chapter-gap span:last-child {
+  flex: 1;
+  height: 1px;
+  background: var(--color-line-strong);
 }
 
 /* AI 回答 */
