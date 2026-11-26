@@ -256,61 +256,99 @@ export default function Splash() {
         role="presentation"
       >
         <defs>
-          <linearGradient id="dr-glass" x1="0" y1="200" x2="0" y2="320" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stopColor="#3b3934" />
-            <stop offset="0.6" stopColor="#262420" />
-            <stop offset="1" stopColor="#1b1a17" />
-          </linearGradient>
-          <radialGradient id="dr-drop" cx="0.38" cy="0.32" r="0.75">
-            <stop offset="0" stopColor="#6a665c" />
-            <stop offset="0.5" stopColor="#2e2c28" />
-            <stop offset="1" stopColor="#1a1917" />
-          </radialGradient>
           <filter id="dr-soft" x="-20%" y="-20%" width="140%" height="160%">
             <feGaussianBlur stdDeviation="7" />
+          </filter>
+          <filter id="dr-caustic" x="-20%" y="-20%" width="140%" height="160%">
+            <feGaussianBlur stdDeviation="2.5" />
+          </filter>
+          {/*
+            玻璃材质：拿笔画的形状当高度图，
+            - 管身几乎透明，只蒙一层很淡的白
+            - 边缘一圈偏暗（真玻璃边上折射最强，看起来是一圈深色轮廓）
+            - 用镜面光照打出左上方的亮面
+          */}
+          <filter
+            id="dr-glass"
+            filterUnits="userSpaceOnUse"
+            x={VIEW.x - 60}
+            y={VIEW.y - 60}
+            width={VIEW.w + 120}
+            height={VIEW.h + 120}
+            colorInterpolationFilters="sRGB"
+          >
+            <feGaussianBlur in="SourceAlpha" stdDeviation={TUBE * 0.17} result="bump" />
+            <feSpecularLighting
+              in="bump"
+              surfaceScale={TUBE * 0.3}
+              specularConstant="1.6"
+              specularExponent="34"
+              lightingColor="#ffffff"
+              result="spec"
+            >
+              <feDistantLight azimuth="235" elevation="52" />
+            </feSpecularLighting>
+            <feComposite in="spec" in2="SourceAlpha" operator="in" result="specIn" />
+
+            <feMorphology in="SourceAlpha" operator="erode" radius={TUBE * 0.13} result="core" />
+            <feGaussianBlur in="core" stdDeviation={TUBE * 0.06} result="coreSoft" />
+            <feComposite in="SourceAlpha" in2="coreSoft" operator="out" result="rim" />
+            <feFlood floodColor="#34403b" floodOpacity="0.62" />
+            <feComposite in2="rim" operator="in" result="rimTint" />
+
+            <feFlood floodColor="#ffffff" floodOpacity="0.16" />
+            <feComposite in2="SourceAlpha" operator="in" result="body" />
+
+            <feMerge>
+              <feMergeNode in="body" />
+              <feMergeNode in="rimTint" />
+              <feMergeNode in="specIn" />
+            </feMerge>
           </filter>
         </defs>
 
         <g data-drop="" style={{ transformOrigin: `${START.x}px ${START.y}px`, transformBox: 'view-box' }}>
-          <circle cx={START.x + 2} cy={START.y + 8} r={TUBE * 1.5} fill="#1f1e1b" opacity="0.2" filter="url(#dr-soft)" />
-          <circle cx={START.x} cy={START.y} r={TUBE * 1.35} fill="url(#dr-drop)" />
-          <ellipse cx={START.x - 6} cy={START.y - 8} rx={TUBE * 0.5} ry={TUBE * 0.3} fill="#fff" opacity="0.7" />
+          <circle cx={START.x + 3} cy={START.y + 12} r={TUBE * 1.3} fill="#1f1e1b" opacity="0.17" filter="url(#dr-soft)" />
+          <circle cx={START.x + 2} cy={START.y + 10} r={TUBE * 0.6} fill="#fffaf0" opacity="0.9" filter="url(#dr-caustic)" />
+          <circle cx={START.x} cy={START.y} r={TUBE * 1.35} fill="#000" filter="url(#dr-glass)" />
+          <ellipse cx={START.x - 7} cy={START.y - 9} rx={TUBE * 0.42} ry={TUBE * 0.24} fill="#fff" opacity="0.85" />
         </g>
 
         <g data-words="" fill="none" strokeLinecap="round" strokeLinejoin="round">
           {WORDS.map((d, wi) => (
             <g key={wi}>
-              {/* 阴影：让玻璃管浮在背景上 */}
+              {/* 落在纸上的影子 */}
               <path
                 data-word={wi}
                 d={d}
-                transform="translate(2 9)"
+                transform="translate(3 11)"
                 stroke="#1f1e1b"
-                strokeOpacity="0.16"
+                strokeOpacity="0.17"
                 strokeWidth={TUBE + 4}
                 filter="url(#dr-soft)"
                 {...dash}
               />
-              {/* 管身 */}
-              <path data-word={wi} d={d} stroke="url(#dr-glass)" strokeWidth={TUBE} {...dash} />
-              {/* 右下内侧一道暖金反光，显出圆管的厚度 */}
+              {/* 影子里一道被玻璃聚起来的亮光 */}
               <path
                 data-word={wi}
                 d={d}
-                transform={`translate(${TUBE * 0.14} ${TUBE * 0.17})`}
-                stroke="#e8c46a"
-                strokeOpacity="0.14"
-                strokeWidth={TUBE * 0.42}
+                transform="translate(2 9)"
+                stroke="#fffaf0"
+                strokeOpacity="0.9"
+                strokeWidth={TUBE * 0.35}
+                filter="url(#dr-caustic)"
                 {...dash}
               />
-              {/* 高光 */}
+              {/* 玻璃管本身 */}
+              <path data-word={wi} d={d} stroke="#000" strokeWidth={TUBE} filter="url(#dr-glass)" {...dash} />
+              {/* 一道细长的高光，让玻璃更清透 */}
               <path
                 data-word={wi}
                 d={d}
-                transform={`translate(${-TUBE * 0.16} ${-TUBE * 0.2})`}
+                transform={`translate(${-TUBE * 0.18} ${-TUBE * 0.22})`}
                 stroke="#ffffff"
-                strokeOpacity="0.38"
-                strokeWidth={TUBE * 0.18}
+                strokeOpacity="0.75"
+                strokeWidth={TUBE * 0.12}
                 {...dash}
               />
             </g>
