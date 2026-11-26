@@ -266,11 +266,14 @@ textarea {
 
 /* ---------- 开场动画 ---------- */
 .dr-splash {
-  background:
-    radial-gradient(60% 34% at 50% 46%, rgba(52, 78, 214, 0.55), rgba(52, 78, 214, 0) 70%),
-    radial-gradient(80% 50% at 18% 12%, rgba(176, 206, 255, 0.9), rgba(176, 206, 255, 0) 70%),
-    radial-gradient(90% 60% at 85% 95%, rgba(196, 178, 255, 0.85), rgba(196, 178, 255, 0) 70%),
-    linear-gradient(160deg, #a9bdf7 0%, #8fa2f2 45%, #a79cf0 100%);
+  /* 和书架首页同一套纸色：暖白纸 + 淡网格，中间一点暖金色的光 */
+  background-color: var(--color-paper);
+  background-image:
+    radial-gradient(46% 24% at 50% 47%, rgba(232, 196, 106, 0.2), rgba(232, 196, 106, 0) 70%),
+    radial-gradient(70% 40% at 85% 100%, rgba(168, 69, 42, 0.06), rgba(168, 69, 42, 0) 70%),
+    linear-gradient(rgba(31, 30, 27, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(31, 30, 27, 0.028) 1px, transparent 1px);
+  background-size: auto, auto, 96px 96px, 96px 96px;
   touch-action: none;
 }
 

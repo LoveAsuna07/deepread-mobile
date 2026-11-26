@@ -16,6 +16,10 @@ interface Glyph {
   skip: number
   segs: Seg[]
   width: number
+  /** 出笔停在字母上半部（像 r 的肩），下一个字母要从高处接 */
+  exitHigh?: boolean
+  /** 上一个字母从高处出笔时，用这几段换掉自己的第一段接笔 */
+  highJoin?: Seg[]
 }
 
 // 每个字母在自己的坐标系里，从 (0, 290) 附近接笔进来，到 (width, 288) 附近出笔
@@ -45,6 +49,10 @@ const GLYPHS: Record<string, Glyph> = {
       [43, 304, 56, 296, 64, 288],
     ],
     width: 64,
+    highJoin: [
+      [8, 238, 8, 256, 14, 263],
+      [24, 270, 42, 263, 44, 248],
+    ],
   },
   p: {
     join: [0, 288],
@@ -62,16 +70,17 @@ const GLYPHS: Record<string, Glyph> = {
   },
   r: {
     join: [0, 289],
-    start: [2, 262],
+    start: [0, 278],
     skip: 0,
     segs: [
-      [8, 272, 15, 238, 18, 213],
-      [22, 226, 32, 230, 40, 224],
-      [47, 218, 50, 212, 54, 216],
-      [60, 238, 56, 270, 60, 288],
-      [64, 298, 74, 296, 82, 288],
+      [6, 262, 12, 236, 15, 212],
+      [15, 240, 14, 268, 14, 293],
+      [14, 268, 15, 248, 19, 236],
+      [27, 214, 46, 206, 58, 216],
+      [63, 220, 66, 226, 68, 233],
     ],
-    width: 82,
+    width: 68,
+    exitHigh: true,
   },
   a: {
     join: [0, 289],
@@ -97,7 +106,9 @@ function wordPath(word: string, x0: number) {
   let d = ''
   ;[...word].forEach((ch, i) => {
     const g = GLYPHS[ch]
-    const segs = i === 0 ? g.segs.slice(g.skip) : g.segs
+    const prev = i > 0 ? GLYPHS[word[i - 1]] : null
+    const segs =
+      i === 0 ? g.segs.slice(g.skip) : prev?.exitHigh && g.highJoin ? [...g.highJoin, ...g.segs.slice(1)] : g.segs
     if (i === 0) d += `M ${x + g.start[0]} ${g.start[1]}`
     for (const s of segs) d += ` C ${x + s[0]} ${s[1]} ${x + s[2]} ${s[3]} ${x + s[4]} ${s[5]}`
     x += g.width
@@ -113,11 +124,11 @@ const VIEW = { x: -30, y: 70, w: TEXT_W + 60, h: 360 }
 const START = { x: GLYPHS.d.start[0], y: GLYPHS.d.start[1] }
 
 /** 玻璃管的粗细（路径坐标单位） */
-const TUBE = 21
-const DROP_MS = 950
-const WRITE_MS = 2000
-const LIFT_MS = 160
-const HOLD_MS = 550
+const TUBE = 19
+const DROP_MS = 1150
+const WRITE_MS = 3300
+const LIFT_MS = 240
+const HOLD_MS = 700
 const FADE_MS = 550
 
 function shouldPlay() {
@@ -151,12 +162,14 @@ export default function Splash() {
     list.push(
       drop.animate(
         [
-          { transform: `${c} scale(0)`, opacity: 0 },
-          { transform: `${c} scale(1.18)`, opacity: 1, offset: 0.35 },
-          { transform: `${c} scale(1)`, opacity: 1, offset: 0.55 },
+          // 每一段自己的缓动：冒出来带一点回弹，停一下，再顺滑地滑过去
+          { transform: `${c} scale(0)`, opacity: 0, easing: 'cubic-bezier(.3,.7,.4,1)' },
+          { transform: `${c} scale(1.18)`, opacity: 1, offset: 0.3, easing: 'ease-out' },
+          { transform: `${c} scale(1)`, opacity: 1, offset: 0.42 },
+          { transform: `${c} scale(1)`, opacity: 1, offset: 0.55, easing: 'cubic-bezier(.55,0,.25,1)' },
           { transform: 'translate(0px, 0px) scale(0.9)', opacity: 1 },
         ],
-        { duration: DROP_MS, easing: 'cubic-bezier(.4,0,.3,1)', fill: 'both' },
+        { duration: DROP_MS, fill: 'both' },
       ),
     )
     // 写字开始后水珠缩成笔头
@@ -201,6 +214,8 @@ export default function Splash() {
         fill: 'forwards',
       }),
     )
+    // 浏览器会自动丢掉已播完、又被后面动画覆盖的动画；留着它们，跳过和逐帧检查时才准
+    list.forEach((a) => a.persist?.())
     anims.current = list
 
     const hold = import.meta.env.DEV && location.search.includes('splash-hold')
@@ -242,14 +257,14 @@ export default function Splash() {
       >
         <defs>
           <linearGradient id="dr-glass" x1="0" y1="200" x2="0" y2="320" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stopColor="#ffffff" stopOpacity="0.95" />
-            <stop offset="0.55" stopColor="#e4ebff" stopOpacity="0.78" />
-            <stop offset="1" stopColor="#c9d5ff" stopOpacity="0.85" />
+            <stop offset="0" stopColor="#3b3934" />
+            <stop offset="0.6" stopColor="#262420" />
+            <stop offset="1" stopColor="#1b1a17" />
           </linearGradient>
           <radialGradient id="dr-drop" cx="0.38" cy="0.32" r="0.75">
-            <stop offset="0" stopColor="#ffffff" stopOpacity="1" />
-            <stop offset="0.45" stopColor="#eef2ff" stopOpacity="0.85" />
-            <stop offset="1" stopColor="#b9c8ff" stopOpacity="0.75" />
+            <stop offset="0" stopColor="#6a665c" />
+            <stop offset="0.5" stopColor="#2e2c28" />
+            <stop offset="1" stopColor="#1a1917" />
           </radialGradient>
           <filter id="dr-soft" x="-20%" y="-20%" width="140%" height="160%">
             <feGaussianBlur stdDeviation="7" />
@@ -257,9 +272,9 @@ export default function Splash() {
         </defs>
 
         <g data-drop="" style={{ transformOrigin: `${START.x}px ${START.y}px`, transformBox: 'view-box' }}>
-          <circle cx={START.x + 2} cy={START.y + 8} r={TUBE * 1.5} fill="#2c3fb8" opacity="0.22" filter="url(#dr-soft)" />
+          <circle cx={START.x + 2} cy={START.y + 8} r={TUBE * 1.5} fill="#1f1e1b" opacity="0.2" filter="url(#dr-soft)" />
           <circle cx={START.x} cy={START.y} r={TUBE * 1.35} fill="url(#dr-drop)" />
-          <ellipse cx={START.x - 6} cy={START.y - 8} rx={TUBE * 0.5} ry={TUBE * 0.3} fill="#fff" opacity="0.9" />
+          <ellipse cx={START.x - 6} cy={START.y - 8} rx={TUBE * 0.5} ry={TUBE * 0.3} fill="#fff" opacity="0.7" />
         </g>
 
         <g data-words="" fill="none" strokeLinecap="round" strokeLinejoin="round">
@@ -270,21 +285,21 @@ export default function Splash() {
                 data-word={wi}
                 d={d}
                 transform="translate(2 9)"
-                stroke="#2238b0"
-                strokeOpacity="0.28"
-                strokeWidth={TUBE + 6}
+                stroke="#1f1e1b"
+                strokeOpacity="0.16"
+                strokeWidth={TUBE + 4}
                 filter="url(#dr-soft)"
                 {...dash}
               />
               {/* 管身 */}
               <path data-word={wi} d={d} stroke="url(#dr-glass)" strokeWidth={TUBE} {...dash} />
-              {/* 右下内侧一道暗边，显出圆管的厚度 */}
+              {/* 右下内侧一道暖金反光，显出圆管的厚度 */}
               <path
                 data-word={wi}
                 d={d}
                 transform={`translate(${TUBE * 0.14} ${TUBE * 0.17})`}
-                stroke="#7f95f2"
-                strokeOpacity="0.32"
+                stroke="#e8c46a"
+                strokeOpacity="0.14"
                 strokeWidth={TUBE * 0.42}
                 {...dash}
               />
@@ -294,8 +309,8 @@ export default function Splash() {
                 d={d}
                 transform={`translate(${-TUBE * 0.16} ${-TUBE * 0.2})`}
                 stroke="#ffffff"
-                strokeOpacity="0.95"
-                strokeWidth={TUBE * 0.26}
+                strokeOpacity="0.38"
+                strokeWidth={TUBE * 0.18}
                 {...dash}
               />
             </g>
